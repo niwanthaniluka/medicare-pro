@@ -131,7 +131,7 @@ Create a `.env` file in the backend root directory (`hospital-backend/.env`):
 PORT=5000
 DB_HOST=localhost
 DB_USER=root
-DB_PASSWORD=your_mysql_password
+DB_PASSWORD=123456
 DB_NAME=medicare_db
 JWT_SECRET=your_super_secret_jwt_key
 ```
