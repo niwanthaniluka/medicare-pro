@@ -1,0 +1,154 @@
+USE hospital_db;
+
+DELIMITER //
+
+-- -------------------------------------------------------------
+-- STORED PROCEDURES
+-- -------------------------------------------------------------
+
+-- Procedure 1: Book Appointment with ACID & Row-Level Lock
+CREATE PROCEDURE sp_BookAppointment(
+    IN p_patient_id INT,
+    IN p_schedule_id INT,
+    IN p_appointment_date DATE
+)
+BEGIN
+    DECLARE v_max_patients INT;
+    DECLARE v_current_count INT;
+    DECLARE v_queue_number INT;
+    DECLARE v_consultation_fee DECIMAL(10,2);
+    DECLARE v_appointment_id INT;
+
+    -- Error Handling: Rollback on SQLEXCEPTION
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    START TRANSACTION;
+
+    -- Row-Level Lock on Schedule and Doctor
+    SELECT ds.max_patients, d.consultation_fee
+    INTO v_max_patients, v_consultation_fee
+    FROM doctor_schedules ds
+    JOIN doctors d ON ds.doctor_id = d.id
+    WHERE ds.id = p_schedule_id AND ds.is_active = TRUE AND d.is_active = 1
+    FOR UPDATE;
+
+    IF v_max_patients IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Schedule not found or doctor is inactive.';
+    END IF;
+
+    -- Current booked count
+    SELECT COUNT(*) INTO v_current_count
+    FROM appointments
+    WHERE schedule_id = p_schedule_id 
+      AND appointment_date = p_appointment_date 
+      AND status != 'Cancelled'
+    FOR UPDATE;
+
+    -- Capacity check
+    IF v_current_count >= v_max_patients THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Appointment limit reached. Fully booked.';
+    END IF;
+
+    SET v_queue_number = v_current_count + 1;
+
+    -- Insert into appointments
+    INSERT INTO appointments (patient_id, schedule_id, appointment_date, queue_number, status, payment_status)
+    VALUES (p_patient_id, p_schedule_id, p_appointment_date, v_queue_number, 'Booked', 'Pending');
+
+    SET v_appointment_id = LAST_INSERT_ID();
+
+    -- Auto-generate bill
+    INSERT INTO bills (appointment_id, total_amount, status)
+    VALUES (v_appointment_id, v_consultation_fee, 'Pending');
+
+    COMMIT;
+
+    -- Output Token Pass
+    SELECT 
+        a.id AS appointment_id,
+        a.queue_number,
+        a.appointment_date,
+        CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
+        CONCAT(d.first_name, ' ', d.last_name) AS doctor_name,
+        b.total_amount
+    FROM appointments a
+    JOIN patients p ON a.patient_id = p.id
+    JOIN doctor_schedules ds ON a.schedule_id = ds.id
+    JOIN doctors d ON ds.doctor_id = d.id
+    JOIN bills b ON b.appointment_id = a.id
+    WHERE a.id = v_appointment_id;
+
+END //
+
+-- Procedure 2: Dashboard KPI Stats
+CREATE PROCEDURE sp_GetDashboardStats()
+BEGIN
+    SELECT 
+        (SELECT COUNT(*) FROM patients WHERE is_active = 1) AS total_patients,
+        (SELECT COUNT(*) FROM appointments) AS total_appointments,
+        (SELECT IFNULL(SUM(total_amount), 0.00) FROM bills WHERE status = 'Paid') AS settled_revenue,
+        (SELECT IFNULL(SUM(total_amount), 0.00) FROM bills WHERE status = 'Pending') AS pending_dues,
+        (SELECT COUNT(*) FROM audit_logs) AS total_audit_events;
+END //
+
+-- -------------------------------------------------------------
+-- TRIGGERS
+-- -------------------------------------------------------------
+
+-- Trigger 1: Appointment Status Update Audit
+CREATE TRIGGER trg_appointment_status_update
+AFTER UPDATE ON appointments
+FOR EACH ROW
+BEGIN
+    IF OLD.status != NEW.status OR OLD.payment_status != NEW.payment_status THEN
+        INSERT INTO audit_logs (table_name, record_id, action, old_data, new_data)
+        VALUES (
+            'appointments',
+            NEW.id,
+            'UPDATE',
+            JSON_OBJECT('status', OLD.status, 'payment_status', OLD.payment_status),
+            JSON_OBJECT('status', NEW.status, 'payment_status', NEW.payment_status)
+        );
+    END IF;
+END //
+
+-- Trigger 2: Doctor Details & Soft-Deletion Audit
+CREATE TRIGGER trg_doctor_update_audit
+AFTER UPDATE ON doctors
+FOR EACH ROW
+BEGIN
+    INSERT INTO audit_logs (table_name, record_id, action, old_data, new_data)
+    VALUES (
+        'doctors',
+        NEW.id,
+        'UPDATE',
+        JSON_OBJECT('fee', OLD.consultation_fee, 'active', OLD.is_active, 'phone', OLD.contact_number),
+        JSON_OBJECT('fee', NEW.consultation_fee, 'active', NEW.is_active, 'phone', NEW.contact_number)
+    );
+END //
+
+DELIMITER ;
+
+-- -------------------------------------------------------------
+-- SCHEDULED EVENT
+-- -------------------------------------------------------------
+SET GLOBAL event_scheduler = ON;
+
+DELIMITER //
+
+CREATE EVENT IF NOT EXISTS ev_AutoCancelExpiredAppointments
+ON SCHEDULE EVERY 1 DAY
+STARTS CURRENT_TIMESTAMP
+DO
+BEGIN
+    UPDATE appointments
+    SET status = 'Cancelled'
+    WHERE appointment_date < CURDATE() 
+      AND status = 'Booked';
+END //
+
+DELIMITER ;
