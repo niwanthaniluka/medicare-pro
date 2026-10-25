@@ -2,6 +2,18 @@
 
 **Advanced Hospital Channeling, ACID Database Governance & Predictive Analytics Architecture**
 
+
+<img width="1916" height="917" alt="Screenshot 2026-10-25 230359" src="https://github.com/user-attachments/assets/ed4971fc-531f-4ef7-a74d-feb0b9d4c3aa" />
+
+<img width="1920" height="1080" alt="Screenshot 2026-10-25 234537" src="https://github.com/user-attachments/assets/60a3fd8a-201c-452b-bbc3-aacf663b0b61" />
+
+<img width="1920" height="1080" alt="Screenshot 2026-10-25 234700" src="https://github.com/user-attachments/assets/b0eceda1-8a03-4a6b-8047-c8b01e264961" />
+
+<img width="1920" height="1080" alt="Screenshot 2026-10-25 234749" src="https://github.com/user-attachments/assets/18b76e3f-9c27-4d91-b9a5-2865f699fd8d" />
+
+<img width="1902" height="1077" alt="Screenshot 2026-10-26 000623" src="https://github.com/user-attachments/assets/4b2a8bbf-994c-4c2d-b730-bb12d3f62202" />
+
+
 ---
 
 ## 📌 Key System Highlights
