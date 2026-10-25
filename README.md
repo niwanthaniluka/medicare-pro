@@ -3,15 +3,39 @@
 **Advanced Hospital Channeling, ACID Database Governance & Predictive Analytics Architecture**
 
 
-<img width="1916" height="917" alt="Screenshot 2026-10-25 230359" src="https://github.com/user-attachments/assets/ed4971fc-531f-4ef7-a74d-feb0b9d4c3aa" />
+### 🖥️ Enterprise System Interfaces & Visualizations
 
-<img width="1920" height="1080" alt="Screenshot 2026-10-25 234537" src="https://github.com/user-attachments/assets/60a3fd8a-201c-452b-bbc3-aacf663b0b61" />
+<div align="center">
 
-<img width="1920" height="1080" alt="Screenshot 2026-10-25 234700" src="https://github.com/user-attachments/assets/b0eceda1-8a03-4a6b-8047-c8b01e264961" />
+<h4>1. Secure Role-Based Authentication Portal</h4>
+<img width="650" alt="MediCare Pro Secure Sign In" src="https://github.com/user-attachments/assets/ed4971fc-531f-4ef7-a74d-feb0b9d4c3aa" />
+<p><em>JWT-protected staff login enforcing Role-Based Access Control (RBAC).</em></p>
 
-<img width="1920" height="1080" alt="Screenshot 2026-10-25 234749" src="https://github.com/user-attachments/assets/18b76e3f-9c27-4d91-b9a5-2865f699fd8d" />
+<br/>
 
-<img width="1902" height="1077" alt="Screenshot 2026-10-26 000623" src="https://github.com/user-attachments/assets/4b2a8bbf-994c-4c2d-b730-bb12d3f62202" />
+<h4>2. Real-Time Channeling, Schedules & AI Visit Forecast</h4>
+<img width="850" alt="Doctor Channeling & AI Patient Visit Forecast" src="https://github.com/user-attachments/assets/60a3fd8a-201c-452b-bbc3-aacf663b0b61" />
+<p><em>ACID transaction booking queue along with Random Forest ML forecast chart (Chart.js).</em></p>
+
+<br/>
+
+<h4>3. Patient Directory with Calculated Age UDF</h4>
+<img width="850" alt="Patient Directory UDF Age and Soft Delete" src="https://github.com/user-attachments/assets/b0eceda1-8a03-4a6b-8047-c8b01e264961" />
+<p><em>Directory integrating MySQL User-Defined Function (fn_CalculatePatientAge) and soft-deletion.</em></p>
+
+<br/>
+
+<h4>4. Database Governance & Archived Records (Views & Restores)</h4>
+<img width="850" alt="Deleted Archives Views and Restore Management" src="https://github.com/user-attachments/assets/18b76e3f-9c27-4d91-b9a5-2865f699fd8d" />
+<p><em>Enterprise view archives (vw_deleted_patients & vw_deleted_doctors) with one-click restore.</em></p>
+
+<br/>
+
+<h4>5. Consultant Specialist Onboarding Modal</h4>
+<img width="850" alt="Onboard Specialist Doctor Modal" src="https://github.com/user-attachments/assets/4b2a8bbf-994c-4c2d-b730-bb12d3f62202" />
+<p><em>Modal interface for registering consultants, category assignment, and session quota management.</em></p>
+
+</div>
 
 
 ---
