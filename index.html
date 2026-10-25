@@ -1,0 +1,2207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCare Pro — Enterprise Hospital System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+
+    <style>
+        /* Toast Notification Box */
+        #notification-container {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            z-index: 999999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Red Error Popup Card */
+        .toast-error {
+            background: #ff3838;
+            color: #ffffff;
+            min-width: 320px;
+            max-width: 440px;
+            padding: 14px 18px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(255, 56, 56, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1.4;
+            border-left: 6px solid #b30000;
+            animation: slideInRight 0.35s ease forwards;
+        }
+
+        .toast-error .toast-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        :root {
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: #f1f5f9;
+        }
+
+        .font-mono-code {
+            font-family: var(--font-mono);
+        }
+
+        .glass-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+        }
+
+        .premium-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
+        }
+
+        .sidebar-gradient {
+            background: linear-gradient(180deg, #090d16 0%, #0f172a 50%, #1e1b4b 100%);
+        }
+
+        .nav-btn-active {
+            background: linear-gradient(90deg, rgba(37, 99, 235, 0.95) 0%, rgba(79, 70, 229, 0.95) 100%);
+            color: #ffffff !important;
+            box-shadow: 0 8px 20px -4px rgba(59, 130, 246, 0.5);
+        }
+
+        .btn-glow-blue {
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+            box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.35);
+        }
+
+        .btn-glow-teal {
+            background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+            box-shadow: 0 4px 14px 0 rgba(13, 148, 136, 0.35);
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #tokenModalContent,
+            #tokenModalContent *,
+            #invoiceModalContent,
+            #invoiceModalContent * {
+                visibility: visible;
+            }
+
+            #tokenModalContent,
+            #invoiceModalContent {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="text-slate-800 min-h-screen selection:bg-blue-600 selection:text-white">
+
+    <!-- ================================================================= -->
+    <!-- 1. FULL-SCREEN LOGIN & REGISTRATION OVERLAY (DEFAULT VIEW)        -->
+    <!-- ================================================================= -->
+    <div id="authScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900 bg-cover bg-center p-4"
+        style="background-image: radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.2) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.25) 0px, transparent 50%), linear-gradient(180deg, #090d16 0%, #0f172a 100%);">
+
+        <div
+            class="max-w-md w-full bg-white/95 backdrop-blur-xl border border-white/20 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+            <div class="text-center mb-6">
+                <div
+                    class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-teal-400 to-blue-600 flex items-center justify-center text-white text-2xl shadow-lg shadow-blue-500/30 mb-3">
+                    <i class="fa-solid fa-heart-pulse animate-pulse"></i>
+                </div>
+                <h2 class="text-2xl font-black text-slate-900 tracking-tight">MediCare <span
+                        class="text-blue-600">Pro</span></h2>
+                <p class="text-xs text-slate-500 font-medium mt-1">Enterprise ADBMS Channeling Portal</p>
+            </div>
+
+            <div
+                class="mb-5 p-3 rounded-xl bg-blue-50/80 border border-blue-200/80 text-[11px] text-blue-900 flex justify-between items-center">
+                <span>Secure staff access · Role-based permissions</span>
+                <span class="bg-blue-200 text-blue-800 px-2 py-0.5 rounded font-bold">JWT + Bcrypt</span>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="portalLoginForm" class="space-y-4">
+                <div>
+                    <label class="block text-[11px] font-extrabold uppercase text-slate-600 mb-1">Username</label>
+                    <input type="text" id="portalUser" required placeholder="Enter username"
+                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-extrabold uppercase text-slate-600 mb-1">Password</label>
+                    <input type="password" id="portalPass" required placeholder="••••••••"
+                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button type="submit"
+                    class="btn-glow-blue w-full text-white font-bold py-3.5 rounded-xl text-sm flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    <span>Secure Sign In</span>
+                </button>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="portalRegisterForm" class="space-y-3 hidden">
+                <div>
+                    <label class="block text-[11px] font-extrabold uppercase text-slate-600 mb-1">Choose
+                        Username</label>
+                    <input type="text" id="regPortalUser" required placeholder="new_username"
+                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-extrabold uppercase text-slate-600 mb-1">Choose
+                        Password</label>
+                    <input type="password" id="regPortalPass" required placeholder="Create password"
+                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-extrabold uppercase text-slate-600 mb-1">Account Role (Assigned
+                        by System)</label>
+                    <select id="regPortalRole"
+                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm outline-none font-medium">
+                        <option value="reception">Receptionist (app_user)</option>
+                        <option value="doctor">Consultant Doctor</option>
+                        <option value="admin">System Administrator (db_admin)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-glow-teal w-full text-white font-bold py-3 rounded-xl text-sm mt-2">
+                    <i class="fa-solid fa-user-plus mr-1.5"></i> Register Account
+                </button>
+            </form>
+
+            <div class="mt-5 pt-4 border-t border-slate-200/80 text-center">
+                <button onclick="togglePortalAuth()" id="portalToggleBtn"
+                    class="text-xs font-bold text-blue-600 hover:underline">
+                    Don't have an account? Create One
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- 2. MAIN APPLICATION DASHBOARD (PROTECTED)                         -->
+    <!-- ================================================================= -->
+    <div id="mainAppLayout" class="hidden flex min-h-screen">
+
+        <!-- LEFT SIDEBAR -->
+        <aside
+            class="w-72 sidebar-gradient text-slate-300 flex flex-col justify-between shrink-0 shadow-2xl z-20 select-none">
+            <div>
+                <div class="p-6 flex items-center space-x-3.5 border-b border-slate-800/80">
+                    <div
+                        class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-teal-400 to-blue-600 flex items-center justify-center text-white shadow-lg">
+                        <i class="fa-solid fa-heart-pulse text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-white font-extrabold text-lg tracking-tight">MediCare <span
+                                class="text-teal-400">Pro</span></h1>
+                        <p class="text-[11px] text-slate-400 font-medium">Enterprise ADBMS</p>
+                    </div>
+                </div>
+
+                <div class="p-4 space-y-1.5">
+                    <p class="px-3 text-[10px] font-extrabold uppercase tracking-widest text-slate-500 mb-2">Hospital
+                        Modules</p>
+                    <button onclick="switchTab('booking')" id="tab-booking"
+                        class="nav-btn nav-btn-active w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold">
+                        <div class="flex items-center space-x-3"><i
+                                class="fa-solid fa-calendar-plus text-teal-300"></i><span>Channeling & Schedules</span>
+                        </div>
+                    </button>
+                    <button onclick="switchTab('appointments')" id="tab-appointments"
+                        class="nav-btn w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/5">
+                        <div class="flex items-center space-x-3"><i
+                                class="fa-solid fa-list-check text-sky-400"></i><span>Appointments Queue</span></div>
+                        <span id="navApptCount"
+                            class="bg-blue-500/20 text-blue-300 border border-blue-400/30 font-mono-code text-xs font-bold px-2 py-0.5 rounded-lg">0</span>
+                    </button>
+                    <button onclick="switchTab('patients')" id="tab-patients"
+                        class="nav-btn w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/5">
+                        <div class="flex items-center space-x-3"><i
+                                class="fa-solid fa-hospital-user text-emerald-400"></i><span>Patient Directory</span>
+                        </div>
+                    </button>
+                    <button onclick="switchTab('billing')" id="tab-billing"
+                        class="nav-btn w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/5">
+                        <div class="flex items-center space-x-3"><i
+                                class="fa-solid fa-file-invoice-dollar text-amber-400"></i><span>Cashier &
+                                E-Billing</span></div>
+                    </button>
+
+                    <p class="px-3 pt-5 text-[10px] font-extrabold uppercase tracking-widest text-slate-500 mb-2">DB
+                        Governance</p>
+                    <button onclick="switchTab('audit')" id="tab-audit"
+                        class="nav-btn w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/5">
+                        <div class="flex items-center space-x-3"><i
+                                class="fa-solid fa-shield-halved text-purple-400"></i><span>Trigger Audit Trail</span>
+                        </div>
+                    </button>
+                    <button onclick="switchTab('archive')" id="tab-archive"
+                        class="nav-btn w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/5">
+                        <div class="flex items-center space-x-3"><i
+                                class="fa-solid fa-box-archive text-amber-400"></i><span>Deleted Archives (Views)</span>
+                        </div>
+                    </button>
+                    <button onclick="switchTab('login')" id="tab-login"
+                        class="nav-btn w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/5">
+                        <div class="flex items-center space-x-3"><i
+                                class="fa-solid fa-user-shield text-rose-400"></i><span>RBAC & Security</span></div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Health telemetry -->
+            <div class="p-4 m-4 rounded-2xl bg-slate-900/90 border border-slate-700/60 text-xs space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-400 font-medium">DB Pool</span>
+                    <span id="healthStatusBadge"
+                        class="bg-emerald-950 text-emerald-300 font-mono-code font-bold text-[10px] px-2 py-0.5 rounded border border-emerald-800">HEALTHY</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-400 font-medium">Latency</span>
+                    <span id="healthLatency" class="text-teal-400 font-mono-code font-bold">1ms</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN WORKSPACE -->
+        <div class="flex-1 flex flex-col min-w-0">
+            <header
+                class="glass-header sticky top-0 z-10 border-b border-slate-200/80 px-8 py-4 flex flex-wrap justify-between items-center gap-4">
+                <div>
+                    <h2 id="pageTitle" class="text-xl font-extrabold text-slate-900">Doctor Channeling & Schedules</h2>
+                    <p id="pageSubtitle" class="text-xs text-slate-500 font-medium">Real-time ACID transaction booking &
+                        queue capacity</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div
+                        class="flex items-center space-x-2 bg-slate-100 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-mono-code font-semibold text-slate-700">
+                        <i class="fa-regular fa-clock text-blue-600"></i>
+                        <span id="liveClock">--:--:--</span>
+                    </div>
+                    <button onclick="refreshAllData(true)"
+                        class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition">
+                        <i class="fa-solid fa-arrows-rotate text-blue-600 mr-1.5"></i> Sync DB
+                    </button>
+                    <!-- User Profile & LOGOUT BUTTON -->
+                    <div
+                        class="flex items-center space-x-2 bg-slate-900 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold">
+                        <span id="activeUserBadge" class="text-teal-300 font-bold">User</span>
+                        <button onclick="logoutPortal()" title="Sign Out"
+                            class="ml-2 bg-rose-600/80 hover:bg-rose-600 text-white px-2 py-1 rounded-lg text-[10px] transition">
+                            <i class="fa-solid fa-power-off mr-1"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="p-8 space-y-8 flex-1 max-w-[1600px] w-full mx-auto">
+                <!-- KPI CARDS -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="premium-card p-5 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <span class="text-[11px] font-extrabold uppercase text-slate-400">Registered Patients</span>
+                            <h3 id="kpiPatients" class="text-3xl font-extrabold text-slate-900 mt-1 font-mono-code">0
+                            </h3>
+                            <p class="text-xs text-emerald-600 font-semibold mt-1">B-Tree Indexed Lookup</p>
+                        </div>
+                        <div
+                            class="w-13 h-13 rounded-2xl bg-blue-500 text-white flex items-center justify-center text-2xl p-3 shadow-md">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="premium-card p-5 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <span class="text-[11px] font-extrabold uppercase text-slate-400">Total Channelings</span>
+                            <h3 id="kpiAppointments" class="text-3xl font-extrabold text-slate-900 mt-1 font-mono-code">
+                                0</h3>
+                            <p id="kpiCompletedAppts" class="text-xs text-blue-600 font-semibold mt-1">0 Completed
+                                Visits</p>
+                        </div>
+                        <div
+                            class="w-13 h-13 rounded-2xl bg-teal-500 text-white flex items-center justify-center text-2xl p-3 shadow-md">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
+                    </div>
+                    <div class="premium-card p-5 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <span class="text-[11px] font-extrabold uppercase text-slate-400">Settled Revenue</span>
+                            <h3 id="kpiRevenue" class="text-2xl font-extrabold text-emerald-600 mt-1 font-mono-code">Rs.
+                                0.00</h3>
+                            <p class="text-xs text-slate-500 font-medium mt-1">Verified Cashier Bills</p>
+                        </div>
+                        <div
+                            class="w-13 h-13 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-2xl p-3 shadow-md">
+                            <i class="fa-solid fa-sack-dollar"></i>
+                        </div>
+                    </div>
+                    <div class="premium-card p-5 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <span class="text-[11px] font-extrabold uppercase text-slate-400">Unpaid Dues</span>
+                            <h3 id="kpiPending" class="text-2xl font-extrabold text-amber-600 mt-1 font-mono-code">Rs.
+                                0.00</h3>
+                            <p id="kpiAuditCount" class="text-xs text-purple-600 font-semibold mt-1">0 Trigger Events
+                            </p>
+                        </div>
+                        <div
+                            class="w-13 h-13 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-2xl p-3 shadow-md">
+                            <i class="fa-solid fa-file-invoice"></i>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- AI PATIENT VISIT FORECAST -->
+                <section id="aiForecastSection" class="premium-card p-6 rounded-3xl mb-7">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+                        <div>
+                            <h3 class="text-base font-extrabold text-slate-900">
+                                <i class="fa-solid fa-brain text-indigo-600 mr-2"></i>
+                                AI Patient Visit Forecast
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-1">
+                                Random Forest Prediction · October 2026
+                            </p>
+                        </div>
+
+                        <button type="button" onclick="loadAIForecast()"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-bold">
+                            <i class="fa-solid fa-rotate mr-1"></i> Refresh Forecast
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="rounded-2xl bg-indigo-50 border border-indigo-100 p-5">
+                            <p class="text-xs font-bold text-indigo-700">Predicted Monthly Visits</p>
+                            <p id="aiMonthlyVisits" class="text-3xl font-extrabold text-indigo-900 mt-2">--</p>
+                            <p class="text-xs text-indigo-600 mt-1">October 2026</p>
+                        </div>
+
+                        <div class="rounded-2xl bg-sky-50 border border-sky-100 p-5">
+                            <p class="text-xs font-bold text-sky-700">Highest Predicted Day</p>
+                            <p id="aiPeakDate" class="text-xl font-extrabold text-sky-900 mt-2">--</p>
+                            <p id="aiPeakVisits" class="text-xs text-sky-700 mt-1">Waiting for forecast</p>
+                        </div>
+
+                        <div class="rounded-2xl bg-emerald-50 border border-emerald-100 p-5">
+                            <p class="text-xs font-bold text-emerald-700">ML Model</p>
+                            <p class="text-xl font-extrabold text-emerald-900 mt-2">Random Forest</p>
+                            <p class="text-xs text-emerald-700 mt-1">Academic demonstration</p>
+                        </div>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 p-4 mb-4">
+                        <h4 class="text-sm font-extrabold mb-3">Daily Predicted Visits</h4>
+                        <div class="relative h-80"><canvas id="aiForecastChart"></canvas></div>
+                        <p id="aiForecastStatus" role="status" class="text-xs text-slate-500 mt-3">Loading forecast...
+                        </p>
+                    </div>
+                    <p class="text-xs text-amber-700">Academic demonstration using synthetic data; not validated for
+                        real hospital demand.</p>
+                </section>
+                <!-- END AI PATIENT VISIT FORECAST -->
+
+                <!-- TAB 1: CHANNELING & SCHEDULES -->
+                <div id="section-booking" class="tab-section grid grid-cols-1 lg:grid-cols-12 gap-7">
+                    <div class="lg:col-span-4 premium-card p-6 rounded-3xl flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-base font-extrabold text-slate-900"><i
+                                        class="fa-solid fa-stethoscope text-blue-600 mr-2"></i>New Channeling</h3>
+                                <span
+                                    class="text-[10px] font-mono-code bg-indigo-50 text-indigo-700 font-bold px-2.5 py-1 rounded-lg border border-indigo-200">ACID
+                                    Procedure</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mb-5">Calls <code
+                                    class="font-mono-code text-blue-700">sp_BookAppointment</code> with row-level locks.
+                            </p>
+
+                            <form id="bookingForm" class="space-y-4">
+                                <div>
+                                    <label class="block text-[11px] font-extrabold uppercase text-slate-600 mb-1">Select
+                                        Patient</label>
+                                    <select id="bookPatientId"
+                                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm outline-none">
+                                        <option value="">Loading patients...</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-extrabold uppercase text-slate-600 mb-1">Doctor
+                                        & Session</label>
+                                    <select id="bookScheduleId"
+                                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm outline-none">
+                                        <option value="">Loading schedules...</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-[11px] font-extrabold uppercase text-slate-600 mb-1">Date</label>
+                                    <input type="date" id="bookDate"
+                                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm outline-none">
+                                </div>
+                                <button type="submit"
+                                    class="btn-glow-blue w-full text-white font-bold py-3.5 rounded-xl text-sm flex items-center justify-center space-x-2">
+                                    <i class="fa-solid fa-bolt"></i>
+                                    <span>Book & Generate Token</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-8 premium-card p-6 rounded-3xl">
+                        <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
+                            <div>
+                                <h3 class="text-base font-extrabold text-slate-900">Doctor Schedules & Live Capacity
+                                </h3>
+                                <p class="text-xs text-slate-500">Filtered view joining doctor specialties and schedules
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <!-- Clean Dropdown Filter for Categories -->
+                                <div class="relative flex items-center">
+                                    <i
+                                        class="fa-solid fa-filter text-slate-400 absolute left-3 text-xs pointer-events-none"></i>
+                                    <select id="specialtyFilterDropdown" onchange="filterSpecialty(this.value)"
+                                        class="bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-4 py-1.5 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer">
+                                        <option value="ALL">All Specializations</option>
+                                    </select>
+                                </div>
+                                <!-- Add Doctor Button -->
+                                <button onclick="openDoctorModal()"
+                                    class="btn-glow-blue text-white text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 shadow">
+                                    <i class="fa-solid fa-user-doctor"></i>
+                                    <span>+ Add Doctor</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr
+                                        class="bg-slate-50 border-y border-slate-200 text-slate-500 uppercase text-[11px] font-extrabold">
+                                        <th class="py-3 px-4">Doctor</th>
+                                        <th class="py-3 px-4">Specialization</th>
+                                        <th class="py-3 px-4">Time</th>
+                                        <th class="py-3 px-4">Slot Capacity</th>
+                                        <th class="py-3 px-4 text-right">Fee (LKR)</th>
+                                        <th class="py-3 px-4 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="scheduleTableBody" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="mt-6 pt-5 border-t border-slate-100">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3"><i
+                                    class="fa-solid fa-chart-line text-blue-600 mr-1.5"></i>Consultant Performance
+                                Matrix</h4>
+                            <div id="doctorPerformanceCards" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: APPOINTMENTS QUEUE -->
+                <div id="section-appointments" class="tab-section hidden premium-card p-6 rounded-3xl">
+                    <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+                        <h3 class="text-base font-extrabold text-slate-900">Patient Queue Management</h3>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="searchAppt" oninput="renderAppointments()"
+                                placeholder="Search patient..."
+                                class="px-3.5 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs outline-none">
+                            <button onclick="exportAppointmentsCSV()"
+                                class="bg-slate-900 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold">Export
+                                CSV</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr
+                                    class="bg-slate-50 border-y border-slate-200 text-slate-500 uppercase text-[11px] font-extrabold">
+                                    <th class="py-3 px-4">ID</th>
+                                    <th class="py-3 px-4">Patient</th>
+                                    <th class="py-3 px-4">Doctor</th>
+                                    <th class="py-3 px-4">Date</th>
+                                    <th class="py-3 px-4">Token</th>
+                                    <th class="py-3 px-4">Status</th>
+                                    <th class="py-3 px-4">Bill</th>
+                                    <th class="py-3 px-4 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointmentsTableBody" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 3: PATIENT DIRECTORY -->
+                <div id="section-patients" class="tab-section hidden grid grid-cols-1 lg:grid-cols-12 gap-7">
+                    <div class="lg:col-span-4 premium-card p-6 rounded-3xl">
+                        <h3 class="text-base font-extrabold text-slate-900 mb-4">Register Patient</h3>
+                        <form id="patientForm" class="space-y-3 text-sm">
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="text" id="patFirstName" placeholder="First Name"
+                                    class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 outline-none">
+                                <input type="text" id="patLastName" placeholder="Last Name"
+                                    class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 outline-none">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="date" id="patDob"
+                                    class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none">
+                                <select id="patGender"
+                                    class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 outline-none">
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <input type="text" id="patContact" placeholder="Contact: 0771234567"
+                                class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 outline-none">
+                            <input type="text" id="patAddress" placeholder="Address"
+                                class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 outline-none">
+                            <button type="submit"
+                                class="btn-glow-teal w-full text-white font-bold py-2.5 rounded-xl text-sm">Save
+                                Patient</button>
+                        </form>
+                    </div>
+                    <div class="lg:col-span-8 premium-card p-6 rounded-3xl">
+                        <h3 class="text-base font-extrabold text-slate-900 mb-4">Patient Directory (UDF Age &
+                            Soft-Delete)</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr
+                                        class="bg-slate-50 border-y border-slate-200 text-slate-500 uppercase text-[11px] font-extrabold">
+                                        <th class="py-3 px-4">PID</th>
+                                        <th class="py-3 px-4">Name</th>
+                                        <th class="py-3 px-4">Calculated Age</th>
+                                        <th class="py-3 px-4">Gender</th>
+                                        <th class="py-3 px-4">Contact</th>
+                                        <th class="py-3 px-4 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="patientsTableBody" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: BILLING -->
+                <div id="section-billing" class="tab-section hidden premium-card p-6 rounded-3xl">
+                    <h3 class="text-base font-extrabold text-slate-900 mb-4">Cashier & E-Billing</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr
+                                    class="bg-slate-50 border-y border-slate-200 text-slate-500 uppercase text-[11px] font-extrabold">
+                                    <th class="py-3 px-4">Invoice #</th>
+                                    <th class="py-3 px-4">Patient</th>
+                                    <th class="py-3 px-4">Amount</th>
+                                    <th class="py-3 px-4">Status</th>
+                                    <th class="py-3 px-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="billsTableBody" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 5: AUDIT LOGS -->
+                <div id="section-audit" class="tab-section hidden premium-card p-6 rounded-3xl">
+                    <h3 class="text-base font-extrabold text-slate-900 mb-4">Trigger Audit Trail (JSON Logs)</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr
+                                    class="bg-slate-50 border-y border-slate-200 text-slate-500 uppercase text-[11px] font-extrabold">
+                                    <th class="py-3 px-4">ID</th>
+                                    <th class="py-3 px-4">Table</th>
+                                    <th class="py-3 px-4">Action</th>
+                                    <th class="py-3 px-4">OLD State</th>
+                                    <th class="py-3 px-4">NEW State</th>
+                                    <th class="py-3 px-4">Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditTableBody" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 6: ARCHIVED RECYCLE BIN (VIEWS) -->
+                <div id="section-archive" class="tab-section hidden space-y-6">
+                    <div class="premium-card p-6 rounded-3xl">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-base font-extrabold text-slate-900"><i
+                                        class="fa-solid fa-hospital-user text-rose-500 mr-2"></i>Archived Patients View
+                                    (<code class="font-mono-code text-blue-700">vw_deleted_patients</code>)</h3>
+                                <p class="text-xs text-slate-500">Patients soft-deleted via admin authorization</p>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr
+                                        class="bg-slate-50 border-y border-slate-200 text-slate-500 uppercase text-[11px] font-extrabold">
+                                        <th class="py-3 px-4">PID</th>
+                                        <th class="py-3 px-4">Name</th>
+                                        <th class="py-3 px-4">Contact</th>
+                                        <th class="py-3 px-4">Status</th>
+                                        <th class="py-3 px-4 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="deletedPatientsBody" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="premium-card p-6 rounded-3xl">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-base font-extrabold text-slate-900"><i
+                                        class="fa-solid fa-user-doctor text-amber-500 mr-2"></i>Archived Doctors View
+                                    (<code class="font-mono-code text-blue-700">vw_deleted_doctors</code>)</h3>
+                                <p class="text-xs text-slate-500">Specialists deactivated safely without breaking past
+                                    channeling history</p>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr
+                                        class="bg-slate-50 border-y border-slate-200 text-slate-500 uppercase text-[11px] font-extrabold">
+                                        <th class="py-3 px-4">DID</th>
+                                        <th class="py-3 px-4">Doctor Name</th>
+                                        <th class="py-3 px-4">Specialization</th>
+                                        <th class="py-3 px-4">Fee (LKR)</th>
+                                        <th class="py-3 px-4 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="deletedDoctorsBody" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 7: RBAC -->
+                <div id="section-login" class="tab-section hidden grid grid-cols-1 lg:grid-cols-2 gap-7">
+                    <div class="premium-card p-6 rounded-3xl">
+                        <h3 class="text-base font-extrabold text-slate-900 mb-4">Active Staff Session</h3>
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-sm">
+                            <p><strong>Signed In As:</strong> <span id="sessionUser"
+                                    class="text-blue-600 font-bold">admin</span></p>
+                            <p><strong>Role:</strong> <span id="sessionRole"
+                                    class="text-teal-600 font-bold">reception</span></p>
+                            <button onclick="logoutPortal()"
+                                class="mt-3 bg-rose-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Sign Out
+                                Now</button>
+                        </div>
+                    </div>
+                    <div class="premium-card p-6 rounded-3xl">
+                        <h3 class="text-base font-extrabold text-slate-900 mb-4">MySQL RBAC Security Matrix</h3>
+                        <div class="space-y-3 text-xs">
+                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl font-mono-code">
+                                <strong>db_admin:</strong> GRANT ALL PRIVILEGES
+                            </div>
+                            <div class="p-3 bg-teal-50 border border-teal-200 rounded-xl font-mono-code">
+                                <strong>app_user:</strong> SELECT, INSERT, UPDATE, EXECUTE
+                            </div>
+                            <div class="p-3 bg-purple-50 border border-purple-200 rounded-xl font-mono-code">
+                                <strong>report_user:</strong> GRANT SELECT ONLY
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- ADD DOCTOR MODAL -->
+    <div id="doctorModal"
+        class="fixed inset-0 bg-slate-950/60 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h3 class="text-base font-extrabold text-slate-900"><i
+                            class="fa-solid fa-user-doctor text-blue-600 mr-2"></i>Onboard New Specialist</h3>
+                    <p class="text-xs text-slate-500">Register doctor & create default clinic session</p>
+                </div>
+                <button onclick="closeDoctorModal()"
+                    class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+            </div>
+
+            <form id="doctorOnboardForm" class="space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">First Name</label>
+                        <input type="text" id="docFirstName" placeholder="Nisal"
+                            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Last Name</label>
+                        <input type="text" id="docLastName" placeholder="Perera"
+                            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <!-- SPECIALIZATION WITH INLINE EDIT, DELETE & ADD -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block font-bold text-slate-600">Specialization</label>
+                            <button type="button" onclick="toggleNewCategoryInput()"
+                                class="text-[11px] font-bold text-blue-600 hover:underline">+ New Category</button>
+                        </div>
+
+                        <!-- Dropdown + Action Buttons (Edit & Delete) -->
+                        <div class="flex gap-1.5 items-center">
+                            <select id="docSpecialization" onchange="handleSpecialtyChange(this.value)"
+                                class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 outline-none text-xs">
+                                <option value="">-- Select Specialty --</option>
+                            </select>
+
+                            <!-- Edit Button -->
+                            <button type="button" id="btnEditSpecialty" onclick="openEditCategoryBox()"
+                                title="Edit selected category"
+                                class="hidden px-2.5 py-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 rounded-xl transition text-xs">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+
+                            <!-- Delete Button -->
+                            <button type="button" id="btnDeleteSpecialty" onclick="deleteSelectedSpecialty()"
+                                title="Delete selected category"
+                                class="hidden px-2.5 py-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 rounded-xl transition text-xs">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+
+                        <!-- Inline New Category Input Box -->
+                        <div id="newCategoryBox"
+                            class="hidden mt-2 p-2 bg-blue-50/70 border border-blue-200 rounded-xl space-y-1.5">
+                            <input type="text" id="newCategoryName" placeholder="e.g. Neurology, Oncology"
+                                class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs outline-none">
+                            <div class="flex justify-end gap-1">
+                                <button type="button" onclick="toggleNewCategoryInput()"
+                                    class="px-2 py-0.5 bg-slate-200 text-slate-700 rounded text-[10px] font-bold">Cancel</button>
+                                <button type="button" onclick="saveNewCategory()"
+                                    class="px-2 py-0.5 bg-blue-600 text-white rounded text-[10px] font-bold">Save</button>
+                            </div>
+                        </div>
+
+                        <!-- Inline Edit Category Box -->
+                        <div id="editCategoryBox"
+                            class="hidden mt-2 p-2 bg-amber-50/70 border border-amber-200 rounded-xl space-y-1.5">
+                            <label class="block text-[10px] font-extrabold text-amber-800 uppercase">Rename
+                                Category</label>
+                            <input type="text" id="editCategoryName" placeholder="Enter updated category name"
+                                class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs outline-none">
+                            <div class="flex justify-end gap-1">
+                                <button type="button" onclick="closeEditCategoryBox()"
+                                    class="px-2 py-0.5 bg-slate-200 text-slate-700 rounded text-[10px] font-bold">Cancel</button>
+                                <button type="button" onclick="saveUpdatedCategory()"
+                                    class="px-2 py-0.5 bg-amber-600 text-white rounded text-[10px] font-bold">Update</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Fee (LKR)</label>
+                        <input type="number" id="docFee" placeholder="2500.00"
+                            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Email</label>
+                        <input type="email" id="docEmail" placeholder="doctor@medicare.lk"
+                            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Phone</label>
+                        <input type="text" id="docPhone" placeholder="0771234567"
+                            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 outline-none">
+                    </div>
+                </div>
+
+                <!-- Schedule Slot Information -->
+                <div class="pt-2 border-t border-slate-100">
+                    <p class="font-extrabold uppercase text-[10px] text-blue-600 mb-2">Weekly Clinic Slot</p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block font-bold text-slate-500 mb-1">Day</label>
+                            <select id="docDay"
+                                class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2 py-1.5 outline-none">
+                                <option value="Monday">Monday</option>
+                                <option value="Tuesday">Tuesday</option>
+                                <option value="Wednesday">Wednesday</option>
+                                <option value="Thursday">Thursday</option>
+                                <option value="Friday">Friday</option>
+                                <option value="Saturday">Saturday</option>
+                                <option value="Sunday">Sunday</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-500 mb-1">Time (Start - End)</label>
+                            <div class="flex gap-1">
+                                <input type="time" id="docStart" value="08:00"
+                                    class="w-full bg-slate-50 border border-slate-300 rounded-lg px-1 py-1 text-[11px]">
+                                <input type="time" id="docEnd" value="12:00"
+                                    class="w-full bg-slate-50 border border-slate-300 rounded-lg px-1 py-1 text-[11px]">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-500 mb-1">Max Slots</label>
+                            <input type="number" id="docMaxPatients" value="10" min="1" max="100"
+                                class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2 py-1.5 outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-2 pt-3">
+                    <button type="submit" class="flex-1 btn-glow-blue text-white font-bold py-2.5 rounded-xl">Save &
+                        Publish Doctor</button>
+                    <button type="button" onclick="closeDoctorModal()"
+                        class="px-4 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADMIN PASSWORD VERIFICATION MODAL FOR DELETIONS -->
+    <div id="adminAuthModal"
+        class="fixed inset-0 bg-slate-950/70 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 text-center">
+            <div
+                class="w-12 h-12 mx-auto rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl mb-3">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-base font-extrabold text-slate-900">Administrator Authorization</h3>
+            <p id="adminAuthMessage" class="text-xs text-slate-500 mt-1 mb-4">Only administrators can deactivate
+                records.</p>
+
+            <form id="adminAuthForm" class="space-y-3">
+                <input type="password" id="adminAuthPassword" placeholder="Authorization is checked using your session"
+                    disabled
+                    class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:ring-2 focus:ring-rose-500">
+                <div class="flex space-x-2">
+                    <button type="submit"
+                        class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl text-xs transition">Confirm
+                        Delete</button>
+                    <button type="button" onclick="closeAdminAuthModal()"
+                        class="px-4 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl text-xs">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOKEN MODAL -->
+    <div id="tokenModal"
+        class="fixed inset-0 bg-slate-950/60 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div id="tokenModalContent"
+            class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 text-center">
+            <h3 class="text-lg font-extrabold text-slate-900">MediCare Pro Hospital</h3>
+            <p class="text-xs text-slate-500 mb-4">Channeling Token Pass</p>
+            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-5 rounded-2xl shadow-lg mb-4">
+                <p class="text-[11px] uppercase font-semibold opacity-80">Queue Token Number</p>
+                <h2 id="tokenQueueNum" class="text-4xl font-extrabold font-mono-code my-1">#01</h2>
+                <p id="tokenDoctor" class="text-xs font-bold mt-1">Dr. -</p>
+            </div>
+            <div class="space-y-2 text-xs border-y border-dashed border-slate-200 py-3 mb-4 text-left">
+                <div class="flex justify-between"><span class="text-slate-500">Patient:</span><span id="tokenPatient"
+                        class="font-bold"></span></div>
+                <div class="flex justify-between"><span class="text-slate-500">Date:</span><span id="tokenDate"
+                        class="font-mono-code font-bold"></span></div>
+                <div class="flex justify-between"><span class="text-slate-500">Fee:</span><span id="tokenFee"
+                        class="font-bold text-emerald-600"></span></div>
+            </div>
+            <div class="flex space-x-2 no-print">
+                <button onclick="window.print()"
+                    class="flex-1 bg-blue-600 text-white font-bold py-2 rounded-xl text-xs">Print Pass</button>
+                <button onclick="closeTokenModal()"
+                    class="px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl text-xs">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- INVOICE MODAL -->
+    <div id="invoiceModal"
+        class="fixed inset-0 bg-slate-950/60 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div id="invoiceModalContent"
+            class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Hospital Official Receipt</h3>
+            <div class="space-y-2 text-sm border-y border-dashed border-slate-200 py-3 my-4">
+                <div class="flex justify-between"><span class="text-slate-500">Invoice:</span><span id="modalBillId"
+                        class="font-bold font-mono-code"></span></div>
+                <div class="flex justify-between"><span class="text-slate-500">Patient:</span><span id="modalPatient"
+                        class="font-bold"></span></div>
+                <div class="flex justify-between"><span class="text-slate-500">Amount:</span><span id="modalAmount"
+                        class="font-bold text-blue-700"></span></div>
+            </div>
+            <div class="flex space-x-2 no-print">
+                <button onclick="window.print()"
+                    class="flex-1 bg-blue-600 text-white font-bold py-2 rounded-xl text-sm">Print</button>
+                <button onclick="closeInvoiceModal()"
+                    class="px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl text-sm">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- JAVASCRIPT LOGIC                                              -->
+    <!-- ============================================================= -->
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+
+        // Authorized API requests: automatically attach session JWT.
+        const nativeFetch = window.fetch.bind(window);
+        window.fetch = function (input, init = {}) {
+            const url = typeof input === 'string' ? input : input.url;
+            if (url.startsWith(API_BASE) && !url.includes('/auth/')) {
+                const token = sessionStorage.getItem('medicare_jwt');
+                init = { ...init, headers: { ...(init.headers || {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) } };
+            }
+            return nativeFetch(input, init);
+        };
+        const ROLE_TABS = {
+            db_admin: ['booking', 'appointments', 'patients', 'billing', 'audit', 'archive', 'login'],
+            app_user: ['booking', 'appointments', 'patients', 'billing'],
+            receptionist: ['booking', 'appointments', 'patients', 'billing'],
+            doctor: ['booking'],
+            report_user: ['appointments', 'billing', 'audit']
+        };
+        function roleTabs() {
+            return ROLE_TABS[sessionStorage.getItem('medicare_role')] || [];
+        }
+        function applyRoleNavigation() {
+            const allowed = roleTabs();
+            ['booking', 'appointments', 'patients', 'billing', 'audit', 'archive', 'login'].forEach(tab => {
+                const button = document.getElementById('tab-' + tab);
+                if (button) button.classList.toggle('hidden', !allowed.includes(tab));
+            });
+            // Hide financial and global operational metrics from the doctor dashboard.
+            const isDoctor = sessionStorage.getItem('medicare_role') === 'doctor';
+            const kpiContainer = document.getElementById('kpiPatients')?.closest('.grid');
+            if (kpiContainer) kpiContainer.classList.toggle('hidden', isDoctor);
+            const addDoctorButton = document.querySelector('[onclick="openDoctorModal()"]');
+            if (addDoctorButton) addDoctorButton.classList.toggle('hidden', sessionStorage.getItem('medicare_role') !== 'db_admin');
+            const bookingForm = document.getElementById('bookingForm');
+            if (bookingForm) bookingForm.classList.toggle('hidden', isDoctor);
+            const performance = document.getElementById('doctorPerformanceCards')?.parentElement;
+            if (performance) performance.classList.toggle('hidden', isDoctor);
+            const first = allowed[0];
+            if (first) switchTab(first);
+        }
+
+        let state = {
+            schedules: [],
+            patients: [],
+            appointments: [],
+            bills: [],
+            auditLogs: [],
+            deletedPatients: [],
+            deletedDoctors: [],
+            selectedSpecialty: 'ALL',
+            pendingDelete: null
+        };
+
+        document.getElementById('bookDate').valueAsDate = new Date();
+
+        setInterval(() => {
+            const clock = document.getElementById('liveClock');
+            if (clock) clock.innerText = new Date().toLocaleTimeString('en-US', { hour12: true });
+        }, 1000);
+
+        // =============================================================
+        // TOAST / RED POPUP SYSTEM
+        // =============================================================
+        function showErrorPopup(message) {
+            let container = document.getElementById('notification-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'notification-container';
+                document.body.appendChild(container);
+            }
+
+            const toast = document.createElement('div');
+            toast.className = 'toast-error';
+            toast.innerHTML = `
+                <span class="toast-icon">⚠️</span>
+                <div style="flex: 1;">${message}</div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.transition = 'all 0.4s ease';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 400);
+            }, 4000);
+        }
+
+        // =============================================================
+        // VALIDATION FUNCTIONS
+        // =============================================================
+        function validateDoctorForm(formData) {
+            const contactVal = (formData.phone || '').trim();
+            const phoneRegex = /^(?:\+94|0)[0-9]{9}$/;
+
+            // 1. Phone / Contact Number Check
+            if (!contactVal) {
+                showErrorPopup('Contact number is required!');
+                return false;
+            }
+            if (!phoneRegex.test(contactVal)) {
+                showErrorPopup('Please enter a valid Sri Lankan contact number! (e.g., 0771234567 or +94771234567)');
+                return false;
+            }
+
+            // 2. Names Check
+            if (!formData.first_name || formData.first_name.trim().length < 2) {
+                showErrorPopup('Doctor first name must be at least 2 characters long!');
+                return false;
+            }
+            if (!formData.last_name || formData.last_name.trim().length < 2) {
+                showErrorPopup('Doctor last name must be at least 2 characters long!');
+                return false;
+            }
+
+            // 3. Specialization Check
+            if (!formData.specialization_id || formData.specialization_id === "" || formData.specialization_id === "0") {
+                showErrorPopup('Please select a valid specialization category!');
+                return false;
+            }
+
+            // 4. Consultation Fee Check
+            const fee = Number(formData.consultation_fee);
+            if (!formData.consultation_fee || isNaN(fee) || fee <= 0) {
+                showErrorPopup('Consultation fee must be a positive number greater than 0!');
+                return false;
+            }
+            if (fee > 100000) {
+                showErrorPopup('Consultation fee cannot exceed LKR 100,000!');
+                return false;
+            }
+
+            // 5. Email Check (Optional)
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (formData.email && formData.email.trim() !== '' && !emailRegex.test(formData.email.trim())) {
+                showErrorPopup('Please provide a valid email address! (e.g., doctor@medicare.lk)');
+                return false;
+            }
+
+            // 6. Time Slot Check
+            if (formData.start_time && formData.end_time && formData.start_time >= formData.end_time) {
+                showErrorPopup('Clinic start time must be earlier than the end time!');
+                return false;
+            }
+
+            return true;
+        }
+
+        function validateCategoryForm(name) {
+            if (!name || name.trim().length < 2) {
+                showErrorPopup('Category name must be at least 2 characters long!');
+                return false;
+            }
+            if (/^\d+$/.test(name.trim())) {
+                showErrorPopup('Category name cannot contain only numbers!');
+                return false;
+            }
+            return true;
+        }
+
+        function validatePatientForm(data) {
+            if (!data.first_name || data.first_name.trim().length < 2 || !data.last_name || data.last_name.trim().length < 2) {
+                showErrorPopup('Patient first name and last name are required (min 2 characters)!');
+                return false;
+            }
+            if (!data.dob) {
+                showErrorPopup('Please select a valid Date of Birth!');
+                return false;
+            }
+            const phoneRegex = /^(?:\+94|0)[0-9]{9}$/;
+            if (!data.contact_number || !phoneRegex.test(data.contact_number.trim())) {
+                showErrorPopup('Please enter a valid 10-digit Sri Lankan phone number (e.g., 0771234567)!');
+                return false;
+            }
+            return true;
+        }
+
+        // =============================================================
+        // AUTHENTICATION LOGIC
+        // =============================================================
+        function checkSession() {
+            const token = sessionStorage.getItem('medicare_jwt');
+            const user = sessionStorage.getItem('medicare_user');
+            const role = sessionStorage.getItem('medicare_role');
+
+            if (token && user) {
+                document.getElementById('authScreen').classList.add('hidden');
+                document.getElementById('mainAppLayout').classList.remove('hidden');
+                document.getElementById('activeUserBadge').innerText = `${user} (${role})`;
+                document.getElementById('sessionUser').innerText = user;
+                document.getElementById('sessionRole').innerText = role;
+                applyRoleNavigation();
+                refreshAllData();
+            } else {
+                document.getElementById('authScreen').classList.remove('hidden');
+                document.getElementById('mainAppLayout').classList.add('hidden');
+            }
+        }
+
+        function togglePortalAuth() {
+            const isLogin = !document.getElementById('portalLoginForm').classList.contains('hidden');
+            if (isLogin) {
+                document.getElementById('portalLoginForm').classList.add('hidden');
+                document.getElementById('portalRegisterForm').classList.remove('hidden');
+                document.getElementById('portalToggleBtn').innerText = 'Already have an account? Sign In';
+            } else {
+                document.getElementById('portalRegisterForm').classList.add('hidden');
+                document.getElementById('portalLoginForm').classList.remove('hidden');
+                document.getElementById('portalToggleBtn').innerText = "Don't have an account? Create One";
+            }
+        }
+
+        document.getElementById('portalLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('portalUser').value.trim();
+            const password = document.getElementById('portalPass').value;
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const json = await res.json();
+                if (json.success) {
+                    sessionStorage.setItem('medicare_jwt', json.token);
+                    sessionStorage.setItem('medicare_user', json.username);
+                    sessionStorage.setItem('medicare_role', json.role);
+                    checkSession();
+                } else {
+                    showErrorPopup(json.message || 'Invalid credentials');
+                }
+            } catch (err) {
+                showErrorPopup('Connection error with backend');
+            }
+        });
+
+        document.getElementById('portalRegisterForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('regPortalUser').value.trim();
+            const password = document.getElementById('regPortalPass').value;
+            const role = document.getElementById('regPortalRole').value;
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, role })
+                });
+                const json = await res.json();
+                if (json.success) {
+                    alert(json.message);
+                    togglePortalAuth();
+                    document.getElementById('portalUser').value = username;
+                    document.getElementById('portalPass').value = '';
+                } else {
+                    showErrorPopup(json.message || 'Registration failed');
+                }
+            } catch (err) {
+                showErrorPopup('Server error during registration');
+            }
+        });
+
+        function logoutPortal() {
+            sessionStorage.clear();
+            checkSession();
+        }
+
+        // =============================================================
+        // CORE WORKSPACE SWITCHER
+        // =============================================================
+        function switchTab(tab) {
+            if (!roleTabs().includes(tab)) { showErrorPopup('Access denied for your role'); return; }
+            // Hide every tab panel, then show the requested panel.
+            document.querySelectorAll('.tab-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            const selectedSection = document.getElementById('section-' + tab);
+            if (!selectedSection) {
+                console.warn('Unknown dashboard tab:', tab);
+                return;
+            }
+            selectedSection.classList.remove('hidden');
+
+            // Forecast belongs to the Channeling dashboard only.
+            const forecastSection = document.getElementById('aiForecastSection');
+            if (forecastSection) {
+                forecastSection.classList.toggle('hidden', tab !== 'booking' || !['db_admin', 'report_user'].includes(sessionStorage.getItem('medicare_role')));
+            }
+
+            // Update the highlighted sidebar button.
+            document.querySelectorAll('.nav-btn').forEach(button => {
+                button.classList.remove('nav-btn-active');
+                button.classList.add('text-slate-300');
+            });
+            const activeButton = document.getElementById('tab-' + tab);
+            if (activeButton) {
+                activeButton.classList.add('nav-btn-active');
+                activeButton.classList.remove('text-slate-300');
+            }
+
+            const pageInfo = {
+                booking: ['Doctor Channeling & Schedules', 'Real-time ACID transaction booking & queue capacity'],
+                appointments: ['Appointments Queue', 'Patient appointment and queue management'],
+                patients: ['Patient Directory', 'Patient registration and records'],
+                billing: ['Cashier & E-Billing', 'Hospital invoices and payment management'],
+                audit: ['Trigger Audit Trail', 'Database activity and audit records'],
+                archive: ['Deleted Archives (Views)', 'Archived patient and doctor records'],
+                login: ['RBAC & Security', 'User roles and access control']
+            };
+            const [title, subtitle] = pageInfo[tab];
+            document.getElementById('pageTitle').textContent = title;
+            document.getElementById('pageSubtitle').textContent = subtitle;
+
+            // Avoid refetching thousands of records on every tab click.
+            // Data is fetched on login and by the Sync DB button.
+            window.scrollTo(0, 0);
+        }
+
+        async function fetchSystemHealth() {
+            try {
+                const res = await fetch(`${API_BASE}/health`);
+                const json = await res.json();
+                if (json.success) {
+                    document.getElementById('healthStatusBadge').innerText = json.status;
+                    document.getElementById('healthLatency').innerText = json.latencyMs;
+                }
+            } catch (e) { }
+        }
+
+        async function loadDoctorPerformance() {
+            try {
+                const res = await fetch(`${API_BASE}/analytics/doctors`);
+                const json = await res.json();
+                const container = document.getElementById('doctorPerformanceCards');
+                if (!container) return;
+                container.innerHTML = '';
+                (json.data || []).forEach(d => {
+                    container.innerHTML += `
+                        <div class="bg-slate-50 border border-slate-200/80 p-3 rounded-2xl">
+                            <p class="font-extrabold text-slate-900 text-xs">${d.doctor_name}</p>
+                            <p class="text-[10px] text-blue-600 font-semibold">${d.specialization}</p>
+                            <div class="flex justify-between mt-2 pt-2 border-t border-slate-200/60 text-[11px]">
+                                <span class="text-slate-500">${d.total_consultations} Visits</span>
+                                <span class="font-bold text-emerald-600 font-mono-code">Rs. ${Number(d.total_revenue).toFixed(2)}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (e) { }
+        }
+
+        // =============================================================
+        // SCHEDULES & CATEGORY DROPDOWN
+        // =============================================================
+        async function loadSchedules() {
+            try {
+                const res = await fetch(`${API_BASE}/schedules`);
+                const json = await res.json();
+                state.schedules = json.data || [];
+
+                const dropdown = document.getElementById('specialtyFilterDropdown');
+                if (dropdown) {
+                    const specialties = ['ALL', ...new Set(state.schedules.map(s => s.specialization).filter(Boolean))];
+                    dropdown.innerHTML = '';
+                    specialties.forEach(sp => {
+                        const isSelected = state.selectedSpecialty === sp ? 'selected' : '';
+                        dropdown.innerHTML += `<option value="${sp}" ${isSelected}>${sp === 'ALL' ? 'All Specializations' : sp}</option>`;
+                    });
+                }
+
+                renderScheduleTable();
+            } catch (e) {
+                console.error("Error loading schedules:", e);
+            }
+        }
+
+        function filterSpecialty(val) {
+            state.selectedSpecialty = val;
+            renderScheduleTable();
+        }
+
+        function renderScheduleTable() {
+            const tbody = document.getElementById('scheduleTableBody');
+            const select = document.getElementById('bookScheduleId');
+            if (!tbody || !select) return;
+
+            tbody.innerHTML = '';
+            select.innerHTML = '<option value="">-- Choose Specialist Session --</option>';
+
+            const filtered = state.schedules.filter(s => state.selectedSpecialty === 'ALL' || s.specialization === state.selectedSpecialty);
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-slate-400 font-medium">No active schedules found for this specialization.</td></tr>`;
+            }
+
+            filtered.forEach(s => {
+                const bookedCount = (state.appointments || []).filter(a => a.doctor_name === s.doctor_name && a.status !== 'Cancelled').length;
+                const maxCap = Number(s.max_patients) || 5;
+                const pct = Math.min(100, Math.round((bookedCount / maxCap) * 100));
+
+                const startTime = s.start_time ? s.start_time.slice(0, 5) : '08:00';
+                const endTime = s.end_time ? s.end_time.slice(0, 5) : '12:00';
+                const fee = Number(s.consultation_fee) || 0;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3 px-4 font-bold text-slate-900">Dr. ${s.doctor_name}</td>
+                        <td class="py-3 px-4"><span class="bg-blue-50 text-blue-700 text-xs font-bold px-2.5 py-0.5 rounded-lg border border-blue-200">${s.specialization}</span></td>
+                        <td class="py-3 px-4 text-xs font-medium text-slate-600">${s.day_of_week} (${startTime} - ${endTime})</td>
+                        <td class="py-3 px-4 w-44">
+                            <div class="flex justify-between text-[11px] font-bold mb-1">
+                                <span>${bookedCount}/${maxCap} Slots</span>
+                                <span>${pct}%</span>
+                            </div>
+                            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                <div class="bg-blue-600 h-2 rounded-full" style="width: ${pct}%"></div>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4 text-right font-bold text-slate-900">Rs. ${fee.toFixed(2)}</td>
+                        <td class="py-3 px-4 text-right">
+                            <button onclick="requestAdminAuthDelete('doctor', ${s.doctor_id})" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-2 py-1 bg-rose-50 rounded-lg">
+                                <i class="fa-solid fa-trash-can mr-1"></i>Delete
+                            </button>
+                        </td>
+                    </tr>
+                `;
+
+                select.innerHTML += `<option value="${s.schedule_id}">Dr. ${s.doctor_name} (${s.specialization}) - [Rs. ${fee.toFixed(2)}]</option>`;
+            });
+        }
+
+        // =============================================================
+        // SPECIALIZATIONS MANAGEMENT (ADD, EDIT, DELETE)
+        // =============================================================
+        async function loadSpecializations() {
+            try {
+                const res = await fetch(`${API_BASE}/specializations`);
+                const json = await res.json();
+                const select = document.getElementById('docSpecialization');
+                if (select) {
+                    select.innerHTML = '<option value="">-- Select Specialty --</option>';
+                    (json.data || []).forEach(s => {
+                        select.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+                    });
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function openDoctorModal() {
+            loadSpecializations();
+            handleSpecialtyChange('');
+            document.getElementById('doctorModal').classList.remove('hidden');
+            document.getElementById('doctorModal').classList.add('flex');
+        }
+
+        function closeDoctorModal() {
+            document.getElementById('doctorModal').classList.add('hidden');
+            document.getElementById('doctorModal').classList.remove('flex');
+            closeEditCategoryBox();
+            document.getElementById('newCategoryBox').classList.add('hidden');
+        }
+
+        function toggleNewCategoryInput() {
+            const box = document.getElementById('newCategoryBox');
+            const select = document.getElementById('docSpecialization');
+            closeEditCategoryBox();
+
+            if (box.classList.contains('hidden')) {
+                box.classList.remove('hidden');
+                document.getElementById('newCategoryName').focus();
+                select.disabled = true;
+            } else {
+                box.classList.add('hidden');
+                document.getElementById('newCategoryName').value = '';
+                select.disabled = false;
+            }
+        }
+
+        async function saveNewCategory() {
+            const name = document.getElementById('newCategoryName').value.trim();
+            if (!validateCategoryForm(name)) {
+                return;
+            }
+            try {
+                const res = await fetch(`${API_BASE}/specializations`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+                const json = await res.json();
+                if (json.success) {
+                    await loadSpecializations();
+                    document.getElementById('docSpecialization').value = json.id;
+                    toggleNewCategoryInput();
+                    handleSpecialtyChange(json.id);
+                    await loadSchedules();
+                } else {
+                    showErrorPopup(json.message || json.error || 'Failed to add category');
+                }
+            } catch (err) {
+                showErrorPopup('Server error creating category: ' + err.message);
+            }
+        }
+
+        // Toggle Edit and Delete Action Buttons
+        function handleSpecialtyChange(val) {
+            const btnEdit = document.getElementById('btnEditSpecialty');
+            const btnDelete = document.getElementById('btnDeleteSpecialty');
+            closeEditCategoryBox();
+
+            if (val && val !== "" && val !== "0") {
+                if (btnEdit) btnEdit.classList.remove('hidden');
+                if (btnDelete) btnDelete.classList.remove('hidden');
+            } else {
+                if (btnEdit) btnEdit.classList.add('hidden');
+                if (btnDelete) btnDelete.classList.add('hidden');
+            }
+        }
+
+        // Open Category Rename Box
+        function openEditCategoryBox() {
+            const select = document.getElementById('docSpecialization');
+            const currentName = select.options[select.selectedIndex]?.text;
+
+            if (!select.value) {
+                showErrorPopup('Please select a category to edit!');
+                return;
+            }
+
+            const editBox = document.getElementById('editCategoryBox');
+            const input = document.getElementById('editCategoryName');
+
+            document.getElementById('newCategoryBox').classList.add('hidden');
+            document.getElementById('docSpecialization').disabled = false;
+
+            input.value = currentName;
+            editBox.classList.remove('hidden');
+            input.focus();
+        }
+
+        // Close Category Rename Box
+        function closeEditCategoryBox() {
+            const editBox = document.getElementById('editCategoryBox');
+            if (editBox) {
+                editBox.classList.add('hidden');
+                document.getElementById('editCategoryName').value = '';
+            }
+        }
+
+        // Save Updated Category Name
+        async function saveUpdatedCategory() {
+            const select = document.getElementById('docSpecialization');
+            const id = select.value;
+            const updatedName = document.getElementById('editCategoryName').value.trim();
+
+            if (!id) {
+                showErrorPopup('No category selected!');
+                return;
+            }
+            if (!validateCategoryForm(updatedName)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/specializations/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: updatedName })
+                });
+
+                const json = await res.json();
+
+                if (json.success) {
+                    alert(json.message);
+                    closeEditCategoryBox();
+                    await loadSpecializations();
+
+                    document.getElementById('docSpecialization').value = id;
+                    handleSpecialtyChange(id);
+                    await loadSchedules();
+                } else {
+                    showErrorPopup(json.message || 'Failed to update category');
+                }
+            } catch (err) {
+                showErrorPopup('Server error updating category: ' + err.message);
+            }
+        }
+
+        // Delete Selected Category Safely
+        async function deleteSelectedSpecialty() {
+            const select = document.getElementById('docSpecialization');
+            const id = select.value;
+            const selectedText = select.options[select.selectedIndex]?.text;
+
+            if (!id) {
+                showErrorPopup('Please select a category to delete!');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to delete category "${selectedText}"?`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/specializations/${id}`, {
+                    method: 'DELETE'
+                });
+                const json = await res.json();
+
+                if (json.success) {
+                    alert(json.message || `Category "${selectedText}" deleted successfully!`);
+                    await loadSpecializations();
+                    handleSpecialtyChange('');
+                    await loadSchedules();
+                } else {
+                    showErrorPopup(json.message || 'Cannot delete category assigned to active doctors!');
+                }
+            } catch (err) {
+                showErrorPopup('Server error deleting category: ' + err.message);
+            }
+        }
+
+        // =============================================================
+        // DOCTOR SUBMIT EVENT HANDLER
+        // =============================================================
+        document.getElementById('doctorOnboardForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const payload = {
+                first_name: document.getElementById('docFirstName').value.trim(),
+                last_name: document.getElementById('docLastName').value.trim(),
+                specialization_id: document.getElementById('docSpecialization').value,
+                consultation_fee: document.getElementById('docFee').value,
+                email: document.getElementById('docEmail').value.trim(),
+                phone: document.getElementById('docPhone').value.trim(),
+                day_of_week: document.getElementById('docDay').value,
+                start_time: document.getElementById('docStart').value,
+                end_time: document.getElementById('docEnd').value,
+                max_patients: document.getElementById('docMaxPatients').value
+            };
+
+            // 1. Client-Side Validation (Toast popup on failure)
+            if (!validateDoctorForm(payload)) {
+                return;
+            }
+
+            // 2. Submit to Backend
+            try {
+                const res = await fetch(`${API_BASE}/doctors`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ...payload,
+                        start_time: payload.start_time.length === 5 ? payload.start_time + ':00' : payload.start_time,
+                        end_time: payload.end_time.length === 5 ? payload.end_time + ':00' : payload.end_time
+                    })
+                });
+                const json = await res.json();
+                if (json.success) {
+                    alert('Doctor onboarded successfully!');
+                    closeDoctorModal();
+                    document.getElementById('doctorOnboardForm').reset();
+                    refreshAllData();
+                } else {
+                    showErrorPopup(json.message || json.error || 'Failed to add doctor');
+                }
+            } catch (err) {
+                showErrorPopup('Server communication error: ' + err.message);
+            }
+        });
+
+        // =============================================================
+        // BOOKINGS & TOKENS
+        // =============================================================
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const patient_id = document.getElementById('bookPatientId').value;
+            const schedule_id = document.getElementById('bookScheduleId').value;
+            const appointment_date = document.getElementById('bookDate').value;
+
+            if (!patient_id) {
+                showErrorPopup('Please select a patient!');
+                return;
+            }
+            if (!schedule_id) {
+                showErrorPopup('Please select a doctor channeling session!');
+                return;
+            }
+            if (!appointment_date) {
+                showErrorPopup('Please choose an appointment date!');
+                return;
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            if (appointment_date < today) {
+                showErrorPopup('Cannot book appointments for past dates!');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/appointments/book`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ patient_id, schedule_id, appointment_date })
+                });
+                const json = await res.json();
+                if (json.success) {
+                    if (json.tokenData) showTokenModal(json.tokenData);
+                    await refreshAllData();
+                } else {
+                    showErrorPopup(json.message || json.error || 'Booking failed');
+                }
+            } catch (err) {
+                showErrorPopup('Error booking appointment: ' + err.message);
+            }
+        });
+
+        function showTokenModal(t) {
+            document.getElementById('tokenQueueNum').innerText = `#0${t.queue_number}`;
+            document.getElementById('tokenDoctor').innerText = t.doctor_name;
+            document.getElementById('tokenPatient').innerText = t.patient_name;
+            document.getElementById('tokenDate').innerText = t.appointment_date.split('T')[0];
+            document.getElementById('tokenFee').innerText = `Rs. ${Number(t.total_amount).toFixed(2)}`;
+            document.getElementById('tokenModal').classList.remove('hidden');
+            document.getElementById('tokenModal').classList.add('flex');
+        }
+
+        function closeTokenModal() {
+            document.getElementById('tokenModal').classList.add('hidden');
+            document.getElementById('tokenModal').classList.remove('flex');
+        }
+
+        // =============================================================
+        // PATIENTS DIRECTORY & SOFT DELETE
+        // =============================================================
+        async function loadPatients() {
+            try {
+                const res = await fetch(`${API_BASE}/patients`);
+                const json = await res.json();
+                state.patients = json.data || [];
+                const select = document.getElementById('bookPatientId');
+                const tbody = document.getElementById('patientsTableBody');
+                if (!select || !tbody) return;
+
+                select.innerHTML = '<option value="">-- Choose Patient --</option>';
+                tbody.innerHTML = '';
+                state.patients.forEach(p => {
+                    select.innerHTML += `<option value="${p.id}">#${p.id} - ${p.first_name} ${p.last_name}</option>`;
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="py-3 px-4 font-mono-code text-xs">#${p.id}</td>
+                            <td class="py-3 px-4 font-bold">${p.first_name} ${p.last_name}</td>
+                            <td class="py-3 px-4 text-xs font-bold text-blue-600">${p.calculated_age || '-'} Years (UDF)</td>
+                            <td class="py-3 px-4 text-xs">${p.gender}</td>
+                            <td class="py-3 px-4 text-xs font-mono-code">${p.contact_number}</td>
+                            <td class="py-3 px-4 text-right">
+                                <button onclick="requestAdminAuthDelete('patient', ${p.id})" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-2 py-1 bg-rose-50 rounded-lg">
+                                    <i class="fa-solid fa-trash-can mr-1"></i>Delete
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                document.getElementById('kpiPatients').innerText = state.patients.length;
+            } catch (e) { }
+        }
+
+        document.getElementById('patientForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const patData = {
+                first_name: document.getElementById('patFirstName').value,
+                last_name: document.getElementById('patLastName').value,
+                dob: document.getElementById('patDob').value,
+                gender: document.getElementById('patGender').value,
+                contact_number: document.getElementById('patContact').value,
+                address: document.getElementById('patAddress').value
+            };
+
+            if (!validatePatientForm(patData)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/patients`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(patData)
+                });
+                const json = await res.json();
+                if (json.success) {
+                    alert('Patient registered successfully!');
+                    document.getElementById('patientForm').reset();
+                    refreshAllData();
+                } else {
+                    showErrorPopup(json.message || json.error || 'Failed to save patient');
+                }
+            } catch (err) {
+                showErrorPopup('Server connection error: ' + err.message);
+            }
+        });
+
+        // =============================================================
+        // ADMIN PASSWORD PROTECTED DELETE & ARCHIVES
+        // =============================================================
+        function requestAdminAuthDelete(type, id) {
+            if (sessionStorage.getItem('medicare_role') !== 'db_admin') { showErrorPopup('Administrator access required'); return; }
+            state.pendingDelete = { type, id };
+            document.getElementById('adminAuthMessage').innerText = `Administrator permission required to delete ${type} #${id}.`;
+            document.getElementById('adminAuthPassword').value = '';
+            document.getElementById('adminAuthModal').classList.remove('hidden');
+            document.getElementById('adminAuthModal').classList.add('flex');
+            document.getElementById('adminAuthPassword').focus();
+        }
+
+        function closeAdminAuthModal() {
+            state.pendingDelete = null;
+            document.getElementById('adminAuthModal').classList.add('hidden');
+            document.getElementById('adminAuthModal').classList.remove('flex');
+        }
+
+        document.getElementById('adminAuthForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!state.pendingDelete) return;
+
+            const admin_password = document.getElementById('adminAuthPassword').value;
+            const { type, id } = state.pendingDelete;
+            const endpoint = type === 'doctor' ? `${API_BASE}/doctors/${id}` : `${API_BASE}/patients/${id}`;
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ admin_password })
+                });
+                const json = await res.json();
+                if (json.success) {
+                    alert(json.message);
+                    closeAdminAuthModal();
+                    refreshAllData();
+                } else {
+                    showErrorPopup(json.message || json.error || 'Verification failed');
+                }
+            } catch (err) {
+                showErrorPopup('Server error executing soft-delete');
+            }
+        });
+
+        async function loadArchives() {
+            try {
+                // Deleted Patients View
+                const resPat = await fetch(`${API_BASE}/views/deleted-patients`);
+                const jsonPat = await resPat.json();
+                const tbodyPat = document.getElementById('deletedPatientsBody');
+                if (tbodyPat) {
+                    tbodyPat.innerHTML = '';
+                    (jsonPat.data || []).forEach(p => {
+                        tbodyPat.innerHTML += `
+                            <tr>
+                                <td class="py-3 px-4 font-mono-code text-xs">#${p.id}</td>
+                                <td class="py-3 px-4 font-bold">${p.first_name} ${p.last_name}</td>
+                                <td class="py-3 px-4 text-xs font-mono-code">${p.contact_number}</td>
+                                <td class="py-3 px-4"><span class="bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-0.5 rounded-md">Archived</span></td>
+                                <td class="py-3 px-4 text-right">
+                                    <button onclick="restoreRecord('patient', ${p.id})" class="text-teal-600 hover:text-teal-800 text-xs font-bold px-2 py-1 bg-teal-50 rounded-lg">
+                                        <i class="fa-solid fa-rotate-left mr-1"></i>Restore
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                // Deleted Doctors View
+                const resDoc = await fetch(`${API_BASE}/views/deleted-doctors`);
+                const jsonDoc = await resDoc.json();
+                const tbodyDoc = document.getElementById('deletedDoctorsBody');
+                if (tbodyDoc) {
+                    tbodyDoc.innerHTML = '';
+                    (jsonDoc.data || []).forEach(d => {
+                        tbodyDoc.innerHTML += `
+                            <tr>
+                                <td class="py-3 px-4 font-mono-code text-xs">#${d.id}</td>
+                                <td class="py-3 px-4 font-bold">Dr. ${d.first_name} ${d.last_name}</td>
+                                <td class="py-3 px-4 text-xs font-semibold text-slate-600">${d.specialization}</td>
+                                <td class="py-3 px-4 font-mono-code text-xs">Rs. ${Number(d.consultation_fee).toFixed(2)}</td>
+                                <td class="py-3 px-4 text-right">
+                                    <button onclick="restoreRecord('doctor', ${d.id})" class="text-teal-600 hover:text-teal-800 text-xs font-bold px-2 py-1 bg-teal-50 rounded-lg">
+                                        <i class="fa-solid fa-rotate-left mr-1"></i>Restore
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function restoreRecord(type, id) {
+            const endpoint = type === 'doctor' ? `${API_BASE}/doctors/${id}/restore` : `${API_BASE}/patients/${id}/restore`;
+            try {
+                const res = await fetch(endpoint, { method: 'PUT' });
+                const json = await res.json();
+                if (json.success) {
+                    alert(json.message);
+                    refreshAllData();
+                } else {
+                    showErrorPopup(json.message || 'Restore failed');
+                }
+            } catch (e) {
+                showErrorPopup('Server error on restore');
+            }
+        }
+
+        // =============================================================
+        // QUEUES, BILLING & AUDIT LOGS
+        // =============================================================
+        async function loadAppointments() {
+            try {
+                const res = await fetch(`${API_BASE}/appointments`);
+                const json = await res.json();
+                state.appointments = json.data || [];
+                renderAppointments();
+            } catch (e) { }
+        }
+
+        function renderAppointments() {
+            const q = (document.getElementById('searchAppt')?.value || '').toLowerCase();
+            const tbody = document.getElementById('appointmentsTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            const filtered = state.appointments.filter(a => (a.patient_name || '').toLowerCase().includes(q));
+
+            // Render only first 100 records to keep the browser responsive.
+            // Full records remain in state for totals and CSV export.
+            const rows = filtered.slice(0, 100).map(a => `
+                    <tr>
+                        <td class="py-3 px-4 font-mono-code text-xs">#${a.id}</td>
+                        <td class="py-3 px-4 font-bold">${a.patient_name}</td>
+                        <td class="py-3 px-4 text-xs">Dr. ${a.doctor_name}</td>
+                        <td class="py-3 px-4 text-xs font-mono-code">${a.appointment_date.split('T')[0]}</td>
+                        <td class="py-3 px-4 font-mono-code font-bold text-blue-600">TOKEN #${a.queue_number}</td>
+                        <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-xs font-bold ${a.status === 'Completed' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'}">${a.status}</span></td>
+                        <td class="py-3 px-4 text-xs">${a.payment_status || 'Pending'}</td>
+                        <td class="py-3 px-4 text-right space-x-1">
+                            <button onclick="updateStatus(${a.id}, 'Completed')" class="bg-emerald-600 text-white text-xs px-2 py-1 rounded">Complete</button>
+                            <button onclick="updateStatus(${a.id}, 'Cancelled')" class="bg-rose-600 text-white text-xs px-2 py-1 rounded">Cancel</button>
+                        </td>
+                    </tr>
+                `);
+            tbody.innerHTML = rows.join('');
+            document.getElementById('kpiAppointments').innerText = state.appointments.length;
+            document.getElementById('navApptCount').innerText = state.appointments.length;
+            document.getElementById('kpiCompletedAppts').innerText = `${state.appointments.filter(a => a.status === 'Completed').length} Completed Visits`;
+        }
+
+        async function updateStatus(id, status) {
+            try {
+                const res = await fetch(`${API_BASE}/appointments/${id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+                const json = await res.json();
+                if (!json.success) {
+                    showErrorPopup(json.message || 'Failed to update status');
+                }
+                refreshAllData();
+            } catch (err) {
+                showErrorPopup('Error updating appointment status');
+            }
+        }
+
+        async function loadBills() {
+            try {
+                const res = await fetch(`${API_BASE}/bills`);
+                const json = await res.json();
+                state.bills = json.data || [];
+                const tbody = document.getElementById('billsTableBody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+                let paid = 0, pending = 0;
+                state.bills.forEach(b => {
+                    if (b.status === 'Paid') paid += Number(b.total_amount);
+                    else pending += Number(b.total_amount);
+                });
+                const billRows = state.bills.slice(0, 100).map(b => `
+                        <tr>
+                            <td class="py-3 px-4 font-mono-code">INV-${b.bill_id}</td>
+                            <td class="py-3 px-4 font-bold">${b.patient_name}</td>
+                            <td class="py-3 px-4 font-bold">Rs. ${Number(b.total_amount).toFixed(2)}</td>
+                            <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-xs font-bold ${b.status === 'Paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${b.status}</span></td>
+                            <td class="py-3 px-4 text-right space-x-1">
+                                ${b.status !== 'Paid' ? `<button onclick="payBill(${b.bill_id})" class="bg-blue-600 text-white text-xs px-2 py-1 rounded">Pay</button>` : ''}
+                                <button onclick="openInvoice(${b.bill_id})" class="bg-slate-100 border text-xs px-2 py-1 rounded">Receipt</button>
+                            </td>
+                        </tr>
+                    `);
+                tbody.innerHTML = billRows.join('');
+                document.getElementById('kpiRevenue').innerText = `Rs. ${paid.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+                document.getElementById('kpiPending').innerText = `Rs. ${pending.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            } catch (e) { }
+        }
+
+        async function payBill(id) {
+            try {
+                const res = await fetch(`${API_BASE}/bills/${id}/pay`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ payment_method: 'Cash' })
+                });
+                const json = await res.json();
+                if (!json.success) {
+                    showErrorPopup(json.message || 'Payment failed');
+                }
+                refreshAllData();
+            } catch (err) {
+                showErrorPopup('Error processing bill payment');
+            }
+        }
+
+        function openInvoice(id) {
+            const b = state.bills.find(x => x.bill_id === id);
+            if (!b) return;
+            document.getElementById('modalBillId').innerText = `INV-${b.bill_id}`;
+            document.getElementById('modalPatient').innerText = b.patient_name;
+            document.getElementById('modalAmount').innerText = `Rs. ${Number(b.total_amount).toFixed(2)}`;
+            document.getElementById('invoiceModal').classList.remove('hidden');
+            document.getElementById('invoiceModal').classList.add('flex');
+        }
+
+        function closeInvoiceModal() {
+            document.getElementById('invoiceModal').classList.add('hidden');
+            document.getElementById('invoiceModal').classList.remove('flex');
+        }
+
+        async function loadAuditLogs() {
+            try {
+                const res = await fetch(`${API_BASE}/audit-logs`);
+                const json = await res.json();
+                state.auditLogs = json.data || [];
+                const tbody = document.getElementById('auditTableBody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+                const auditRows = state.auditLogs.slice(0, 100).map(l => `
+                        <tr>
+                            <td class="py-3 px-4 font-mono-code">#${l.id}</td>
+                            <td class="py-3 px-4 font-mono-code">${l.table_name}</td>
+                            <td class="py-3 px-4 font-bold text-purple-700">${l.action}</td>
+                            <td class="py-3 px-4 font-mono-code text-xs text-rose-600">${typeof l.old_data === 'object' ? JSON.stringify(l.old_data) : l.old_data}</td>
+                            <td class="py-3 px-4 font-mono-code text-xs text-emerald-600">${typeof l.new_data === 'object' ? JSON.stringify(l.new_data) : l.new_data}</td>
+                            <td class="py-3 px-4 text-xs font-mono-code">${new Date(l.changed_at).toLocaleTimeString()}</td>
+                        </tr>
+                    `);
+                tbody.innerHTML = auditRows.join('');
+                document.getElementById('kpiAuditCount').innerText = `${state.auditLogs.length} Trigger Events`;
+            } catch (e) { }
+        }
+
+        function exportAppointmentsCSV() {
+            const rows = state.appointments.map(a => [a.id, `"${a.patient_name}"`, `"Dr. ${a.doctor_name}"`, a.appointment_date.split('T')[0], a.queue_number, a.status]);
+            const csv = 'data:text/csv;charset=utf-8,ID,Patient,Doctor,Date,Token,Status\n' + rows.map(e => e.join(',')).join('\n');
+            const link = document.createElement('a');
+            link.setAttribute('href', encodeURI(csv));
+            link.setAttribute('download', 'appointments.csv');
+            link.click();
+        }
+
+        async function refreshAllData() {
+            const role = sessionStorage.getItem('medicare_role');
+            if (role === 'doctor') {
+                await Promise.all([fetchSystemHealth(), loadSchedules()]);
+                return;
+            }
+            if (role === 'report_user') {
+                await Promise.all([loadAppointments(), loadBills(), loadAuditLogs(), fetchSystemHealth()]);
+                return;
+            }
+            await Promise.all([
+                loadAppointments(),
+                loadPatients(),
+                loadBills(),
+                ...(role === 'db_admin' ? [loadAuditLogs()] : []),
+                fetchSystemHealth(),
+                loadDoctorPerformance(),
+                ...(role === 'db_admin' ? [loadArchives()] : [])
+            ]);
+            await loadSchedules();
+        }
+
+
+        let aiForecastChartInstance = null;
+
+        async function loadAIForecast() {
+            const statusEl = document.getElementById('aiForecastStatus');
+            const monthlyEl = document.getElementById('aiMonthlyVisits');
+            const peakDateEl = document.getElementById('aiPeakDate');
+            const peakVisitsEl = document.getElementById('aiPeakVisits');
+
+            try {
+                if (statusEl) statusEl.textContent = 'Loading AI forecast...';
+
+                const response = await fetch(`${API_BASE}/ai/forecast`);
+
+                if (!response.ok) {
+                    throw new Error(`API request failed: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (!result.success || !result.data) {
+                    throw new Error(result.message || 'Forecast data unavailable');
+                }
+
+                const forecast = result.data;
+                const predictions = forecast.daily_predictions;
+
+                if (!Array.isArray(predictions) || predictions.length === 0) {
+                    throw new Error('Daily predictions are missing from the API response');
+                }
+
+                if (monthlyEl) {
+                    monthlyEl.textContent =
+                        Number(forecast.predicted_monthly_visits).toLocaleString();
+                }
+
+                const peak = predictions.reduce((best, day) =>
+                    Number(day.predicted_visits) > Number(best.predicted_visits)
+                        ? day
+                        : best
+                );
+
+                if (peakDateEl) peakDateEl.textContent = peak.date;
+                if (peakVisitsEl) {
+                    peakVisitsEl.textContent =
+                        `${peak.predicted_visits} predicted visits`;
+                }
+
+                const canvas = document.getElementById('aiForecastChart');
+
+                if (!canvas) throw new Error('Forecast chart canvas not found');
+                if (typeof Chart === 'undefined') {
+                    throw new Error('Chart.js did not load. Check your internet connection.');
+                }
+
+                if (aiForecastChartInstance) {
+                    aiForecastChartInstance.destroy();
+                }
+
+                aiForecastChartInstance = new Chart(canvas, {
+                    type: 'bar',
+                    data: {
+                        labels: predictions.map(day => day.date),
+                        datasets: [{
+                            label: 'Predicted Visits',
+                            data: predictions.map(day => Number(day.predicted_visits)),
+                            backgroundColor: 'rgba(79, 70, 229, 0.72)',
+                            borderColor: 'rgb(79, 70, 229)',
+                            borderWidth: 1,
+                            borderRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { precision: 0 },
+                                title: {
+                                    display: true,
+                                    text: 'Predicted visits'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'October 2026'
+                                },
+                                ticks: { maxTicksLimit: 10 }
+                            }
+                        }
+                    }
+                });
+
+                if (statusEl) {
+                    statusEl.textContent =
+                        `Forecast loaded successfully · ${forecast.period || 'October 2026'}`;
+                }
+
+            } catch (error) {
+                console.error('AI forecast error:', error);
+                if (statusEl) {
+                    statusEl.textContent = `Unable to load forecast: ${error.message}`;
+                }
+            }
+        }
+
+
+
+        // Run session check on initial startup
+        checkSession();
+        if (sessionStorage.getItem('medicare_role') === 'db_admin') loadAIForecast();
+    </script>
+</body>
+
+</html>
