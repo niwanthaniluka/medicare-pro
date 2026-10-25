@@ -1,0 +1,14 @@
+{
+  "model": "RandomForestRegressor",
+  "features": [
+    "day_of_week",
+    "previous_day_visits",
+    "previous_7_day_avg"
+  ],
+  "target": "daily appointment count (Booked + Completed; Cancelled excluded)",
+  "training_rows": 358,
+  "test_rows": 72,
+  "mae": 2.82,
+  "rmse": 4.052,
+  "note": "Synthetic academic/demo data; metrics do not imply real-hospital accuracy."
+}

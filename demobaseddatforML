@@ -1,0 +1,83 @@
+-- MediCare Pro: synthetic demo data for AI patient-visit forecasting
+-- Compatible with the supplied hospital_db schema.
+-- WARNING: This is SYNTHETIC academic/demo data, not real patient data.
+-- Run after 01_schema.sql. If your database already contains rows, this script
+-- appends data and uses new auto-generated IDs for most records.
+USE hospital_db;
+SET FOREIGN_KEY_CHECKS = 1;
+
+START TRANSACTION;
+
+-- Add extra specializations without duplicating existing names.
+INSERT INTO specializations (name, description)
+SELECT x.name, x.description
+FROM (
+    SELECT 'General Medicine' AS name, 'General outpatient consultations' AS description
+    UNION ALL SELECT 'Orthopedics', 'Bone, joint and musculoskeletal care'
+    UNION ALL SELECT 'ENT', 'Ear, nose and throat care'
+    UNION ALL SELECT 'Neurology', 'Nervous system care'
+) x
+WHERE NOT EXISTS (SELECT 1 FROM specializations s WHERE s.name = x.name);
+
+-- Add a larger set of synthetic doctors linked to available specializations.
+INSERT INTO doctors (specialization_id, first_name, last_name, contact_number, email, consultation_fee, is_active)
+SELECT s.id, x.first_name, x.last_name, x.phone, x.email, x.fee, 1
+FROM (
+    SELECT 'Kavindu' first_name, 'Jayasinghe' last_name, '0715000001' phone, 'kavindu.ai.demo@example.com' email, 2500.00 fee, 'General Medicine' spec
+    UNION ALL SELECT 'Ishara', 'Wickramasinghe', '0715000002', 'ishara.ai.demo@example.com', 3000.00, 'Orthopedics'
+    UNION ALL SELECT 'Tharushi', 'Gunawardena', '0715000003', 'tharushi.ai.demo@example.com', 2800.00, 'ENT'
+    UNION ALL SELECT 'Malith', 'Bandara', '0715000004', 'malith.ai.demo@example.com', 3500.00, 'Neurology'
+) x
+JOIN specializations s ON s.name = x.spec
+WHERE NOT EXISTS (SELECT 1 FROM doctors d WHERE d.email = x.email);
+
+-- Create a schedule for each added demo doctor for every weekday.
+-- Use existing matching schedule when one exists.
+INSERT INTO doctor_schedules (doctor_id, day_of_week, start_time, end_time, max_patients, is_active)
+SELECT d.id, days.day_name, '08:00:00', '16:00:00', 30, TRUE
+FROM doctors d
+JOIN (
+    SELECT 'Monday' day_name UNION ALL SELECT 'Tuesday' UNION ALL
+    SELECT 'Wednesday' UNION ALL SELECT 'Thursday' UNION ALL
+    SELECT 'Friday'
+) days
+WHERE d.email IN (
+    'kavindu.ai.demo@example.com','ishara.ai.demo@example.com',
+    'tharushi.ai.demo@example.com','malith.ai.demo@example.com'
+)
+AND NOT EXISTS (
+    SELECT 1 FROM doctor_schedules ds
+    WHERE ds.doctor_id = d.id AND ds.day_of_week = days.day_name
+      AND ds.start_time = '08:00:00'
+);
+
+-- Create 150 synthetic demo patients (no real personal data).
+-- The addresses/contact details use obvious demo placeholders.
+INSERT INTO patients (first_name, last_name, dob, gender, contact_number, email, address, is_active)
+SELECT CONCAT('Demo', LPAD(n, 3, '0')),
+       ELT(1 + MOD(n, 8), 'Perera','Silva','Fernando','Jayasinghe','Bandara','Kumara','De Silva','Wickramasinghe'),
+       DATE_ADD('1970-01-01', INTERVAL MOD(n * 97, 18000) DAY),
+       ELT(1 + MOD(n, 3), 'Male','Female','Other'),
+       CONCAT('000', LPAD(n, 7, '0')),
+       CONCAT('patient', n, '.demo@example.com'),
+       CONCAT('Demo Address ', n),
+       1
+FROM (
+    SELECT ones.n + tens.n * 10 + hundreds.n * 100 + 1 AS n
+    FROM (SELECT 0 n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+          UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) ones
+    CROSS JOIN (SELECT 0 n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+          UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) tens
+    CROSS JOIN (SELECT 0 n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+          UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) hundreds
+) nums
+WHERE n <= 150
+AND NOT EXISTS (
+    SELECT 1 FROM patients p WHERE p.email = CONCAT('patient', n, '.demo@example.com')
+);
+
+COMMIT;
+
+-- Generate appointments for 2025-10-01 through 2026-09-30 using the Python generator
+-- provided with this project package. The generator emits valid INSERT statements
+-- based on actual IDs in your database, avoiding assumptions about AUTO_INCREMENT IDs.
